@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: This is practice session using CF Templates
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: InstanceConfiguration
+        Parameters:
+          - ImageId
+          - Ec2InstanceType
+          - KeyName
+
+Parameters:
+  Ec2InstanceType:
+    Description: This is instance type parameters
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t1.micro
+      - t2.micro
+      - t2.nano
+    ConstraintDescription: must be a valid ec2 instance type
+  
+  KeyName:
+    Description: This is to select key pair
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be a valid key pair
+
+  ImageId:
+    Description: The Id of AMI (Amazon Machine Image)
+    Type: String
+  
+Resources:
+  SecurityGroup: 
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ALB SG Group
+      GroupDescription: This is security group to attach server
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: ALB SG Group
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref Ec2InstanceType
+      SecurityGroupIds: 
+        - !Ref SecurityGroup
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: Name
+          Value: EC2 Instance With CF
